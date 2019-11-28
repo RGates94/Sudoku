@@ -65,6 +65,37 @@ impl Puzzle {
             }
         }
     }
+    fn update_box(&mut self, index: usize) {
+        if index < GRID_SIZE {
+            let mut cell_mask = [true; GRID_SIZE];
+            for cell in self.cells
+                [BOX_SIZE * (index / BOX_SIZE)..BOX_SIZE * ((index / BOX_SIZE) + 1)]
+                .iter()
+                .map(|x| &x[BOX_SIZE * (index % BOX_SIZE)..BOX_SIZE * ((index % BOX_SIZE) + 1)])
+                .flatten()
+            {
+                if let Given(cell) = cell {
+                    if let Some(guess) = cell_mask.get_mut(cell.value as usize) {
+                        *guess = false;
+                    }
+                }
+            }
+
+            for cell in self.cells
+                [BOX_SIZE * (index / BOX_SIZE)..BOX_SIZE * ((index / BOX_SIZE) + 1)]
+                .iter_mut()
+                .map(|x| &mut x[BOX_SIZE * (index % BOX_SIZE)..BOX_SIZE * ((index % BOX_SIZE) + 1)])
+                .flatten()
+            {
+                if let Guesses(guesses) = cell {
+                    guesses
+                        .iter_mut()
+                        .zip(cell_mask.iter_mut())
+                        .for_each(|(guess, mask)| *guess &= *mask)
+                }
+            }
+        }
+    }
 }
 
 impl From<String> for Puzzle {
@@ -125,5 +156,7 @@ fn main() {
     puzzle.update_row(0);
     println!("{:?}", puzzle);
     puzzle.update_column(0);
+    println!("{:?}", puzzle);
+    puzzle.update_box(0);
     println!("{:?}", puzzle);
 }
