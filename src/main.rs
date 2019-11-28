@@ -103,6 +103,36 @@ impl Puzzle {
             self.update_box(i);
         }
     }
+    fn recursive_solve(&mut self, output: &mut Vec<Self>, max_solutions: usize) {
+        self.update_candidates();
+        let mut min_options = GRID_SIZE;
+        let mut best_cell = 0;
+        let mut solved = true;
+        for (index, cell) in self.cells.iter().flatten().enumerate() {
+            if let Candidates(candidates) = cell {
+                solved = false;
+                if min_options >= candidates.iter().filter(|x| **x).count() {
+                    min_options = candidates.iter().count();
+                    best_cell = index;
+                }
+            }
+        }
+        if solved {
+            output.push(self.clone());
+            return;
+        }
+        let candidates = self.cells[best_cell/GRID_SIZE][best_cell % GRID_SIZE];
+        if let Candidates(candidates) = candidates {
+            for option in candidates.iter().enumerate().filter_map(|(idx, &valid)| if valid {Some(idx)} else {None}) {
+                if output.len() >= max_solutions {
+                    return;
+                }
+                let mut new_grid = self.clone();
+                new_grid.cells[best_cell/GRID_SIZE][best_cell % GRID_SIZE] = Cell::Given( SolvedCell { value: option as u8, given: false} );
+                new_grid.recursive_solve(output, max_solutions);
+            }
+        }
+    }
 }
 
 impl From<String> for Puzzle {
@@ -160,6 +190,7 @@ fn main() {
     )
     .into();
     println!("{:?}", puzzle);
-    puzzle.update_candidates();
-    println!("{:?}", puzzle);
+    let mut result = vec![];
+    puzzle.recursive_solve(&mut result, 1);
+    println!("{:?}", result);
 }
