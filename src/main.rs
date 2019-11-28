@@ -1,4 +1,4 @@
-use crate::Cell::{Given, Guesses};
+use crate::Cell::{Given, Candidates};
 use array_init::array_init;
 
 const BOX_SIZE: usize = 3;
@@ -13,7 +13,7 @@ struct SolvedCell {
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 enum Cell {
     Given(SolvedCell),
-    Guesses([bool; GRID_SIZE]),
+    Candidates([bool; GRID_SIZE]),
 }
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -33,7 +33,7 @@ impl Puzzle {
                 }
             }
             for cell in row.iter_mut() {
-                if let Guesses(guesses) = cell {
+                if let Candidates(guesses) = cell {
                     guesses
                         .iter_mut()
                         .zip(cell_mask.iter_mut())
@@ -56,7 +56,7 @@ impl Puzzle {
                 }
             }
             for row in self.cells.iter_mut() {
-                if let Some(Guesses(guesses)) = row.get_mut(index) {
+                if let Some(Candidates(guesses)) = row.get_mut(index) {
                     guesses
                         .iter_mut()
                         .zip(cell_mask.iter_mut())
@@ -87,13 +87,20 @@ impl Puzzle {
                 .map(|x| &mut x[BOX_SIZE * (index % BOX_SIZE)..BOX_SIZE * ((index % BOX_SIZE) + 1)])
                 .flatten()
             {
-                if let Guesses(guesses) = cell {
+                if let Candidates(guesses) = cell {
                     guesses
                         .iter_mut()
                         .zip(cell_mask.iter_mut())
                         .for_each(|(guess, mask)| *guess &= *mask)
                 }
             }
+        }
+    }
+    fn update_candidates(&mut self) {
+        for i in 0..GRID_SIZE {
+            self.update_row(i);
+            self.update_column(i);
+            self.update_box(i);
         }
     }
 }
@@ -140,7 +147,7 @@ impl From<String> for Puzzle {
                         value: 8,
                         given: true,
                     }),
-                    _ => Guesses([true; GRID_SIZE]),
+                    _ => Candidates([true; GRID_SIZE]),
                 })
             }),
         }
@@ -153,10 +160,6 @@ fn main() {
     )
     .into();
     println!("{:?}", puzzle);
-    puzzle.update_row(0);
-    println!("{:?}", puzzle);
-    puzzle.update_column(0);
-    println!("{:?}", puzzle);
-    puzzle.update_box(0);
+    puzzle.update_candidates();
     println!("{:?}", puzzle);
 }
