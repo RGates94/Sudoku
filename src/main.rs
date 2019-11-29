@@ -1,5 +1,6 @@
-use crate::Cell::{Candidates, Given};
+use crate::Cell::{Candidates, Solved};
 use array_init::array_init;
+use std::time::Instant;
 
 const BOX_SIZE: usize = 3;
 const GRID_SIZE: usize = BOX_SIZE * BOX_SIZE;
@@ -12,7 +13,7 @@ struct SolvedCell {
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 enum Cell {
-    Given(SolvedCell),
+    Solved(SolvedCell),
     Candidates([bool; GRID_SIZE]),
 }
 
@@ -26,7 +27,7 @@ impl Puzzle {
         if let Some(row) = self.cells.get_mut(index) {
             let mut cell_mask = [true; GRID_SIZE];
             for cell in row.iter() {
-                if let Given(cell) = cell {
+                if let Solved(cell) = cell {
                     if let Some(guess) = cell_mask.get_mut(cell.value as usize) {
                         *guess = false;
                     }
@@ -49,7 +50,7 @@ impl Puzzle {
                 let cell = row
                     .get_mut(index)
                     .expect("Column index out of bounds unexpectedly");
-                if let Given(cell) = cell {
+                if let Solved(cell) = cell {
                     if let Some(guess) = cell_mask.get_mut(cell.value as usize) {
                         *guess = false;
                     }
@@ -74,7 +75,7 @@ impl Puzzle {
                 .map(|x| &x[BOX_SIZE * (index % BOX_SIZE)..BOX_SIZE * ((index % BOX_SIZE) + 1)])
                 .flatten()
             {
-                if let Given(cell) = cell {
+                if let Solved(cell) = cell {
                     if let Some(guess) = cell_mask.get_mut(cell.value as usize) {
                         *guess = false;
                     }
@@ -96,7 +97,7 @@ impl Puzzle {
             }
         }
     }
-    fn update_candidates(&mut self) {
+    fn sweep(&mut self) {
         for i in 0..GRID_SIZE {
             self.update_row(i);
             self.update_column(i);
@@ -104,7 +105,7 @@ impl Puzzle {
         }
     }
     fn recursive_solve(&mut self, output: &mut Vec<Self>, max_solutions: usize) {
-        self.update_candidates();
+        self.sweep();
         let mut min_options = GRID_SIZE;
         let mut best_cell = 0;
         let mut solved = true;
@@ -134,7 +135,7 @@ impl Puzzle {
                 }
                 let mut new_grid = self.clone();
                 new_grid.cells[best_cell / GRID_SIZE][best_cell % GRID_SIZE] =
-                    Cell::Given(SolvedCell {
+                    Cell::Solved(SolvedCell {
                         value: option as u8,
                         given: false,
                     });
@@ -146,7 +147,7 @@ impl Puzzle {
         let mut output = String::new();
         for cell in self.cells.iter().flatten() {
             output += &match cell {
-                Given(solved) => (solved.value + 1).to_string(),
+                Solved(solved) => (solved.value + 1).to_string(),
                 Candidates(_) => "0".to_string(),
             };
         }
@@ -160,39 +161,39 @@ impl From<String> for Puzzle {
         Self {
             cells: array_init(|row| {
                 array_init::<[Cell; GRID_SIZE], _>(|column| match chars.get(9 * row + column) {
-                    Some('1') => Given(SolvedCell {
+                    Some('1') => Solved(SolvedCell {
                         value: 0,
                         given: true,
                     }),
-                    Some('2') => Given(SolvedCell {
+                    Some('2') => Solved(SolvedCell {
                         value: 1,
                         given: true,
                     }),
-                    Some('3') => Given(SolvedCell {
+                    Some('3') => Solved(SolvedCell {
                         value: 2,
                         given: true,
                     }),
-                    Some('4') => Given(SolvedCell {
+                    Some('4') => Solved(SolvedCell {
                         value: 3,
                         given: true,
                     }),
-                    Some('5') => Given(SolvedCell {
+                    Some('5') => Solved(SolvedCell {
                         value: 4,
                         given: true,
                     }),
-                    Some('6') => Given(SolvedCell {
+                    Some('6') => Solved(SolvedCell {
                         value: 5,
                         given: true,
                     }),
-                    Some('7') => Given(SolvedCell {
+                    Some('7') => Solved(SolvedCell {
                         value: 6,
                         given: true,
                     }),
-                    Some('8') => Given(SolvedCell {
+                    Some('8') => Solved(SolvedCell {
                         value: 7,
                         given: true,
                     }),
-                    Some('9') => Given(SolvedCell {
+                    Some('9') => Solved(SolvedCell {
                         value: 8,
                         given: true,
                     }),
@@ -208,8 +209,10 @@ fn main() {
         "100009006020700050003080400009400003080050100700006020000003700000020080000100009",
     )
     .into();
+    let start = Instant::now();
     let mut result = vec![];
     puzzle.recursive_solve(&mut result, 1_000);
+    let elapsed = Instant::now() - start;
     result.sort();
     let max_solutions = result.len() == 1_000;
     for solution in result {
@@ -218,4 +221,5 @@ fn main() {
     if max_solutions {
         println!("Maxed out...");
     }
+    println!("Total of {}.{:0>3} seconds elapsed", elapsed.as_secs(), elapsed.subsec_millis())
 }
