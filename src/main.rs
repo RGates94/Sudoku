@@ -1,4 +1,4 @@
-use crate::Cell::{Given, Candidates};
+use crate::Cell::{Candidates, Given};
 use array_init::array_init;
 
 const BOX_SIZE: usize = 3;
@@ -121,14 +121,23 @@ impl Puzzle {
             output.push(self.clone());
             return;
         }
-        let candidates = self.cells[best_cell/GRID_SIZE][best_cell % GRID_SIZE];
+        let candidates = self.cells[best_cell / GRID_SIZE][best_cell % GRID_SIZE];
         if let Candidates(candidates) = candidates {
-            for option in candidates.iter().enumerate().filter_map(|(idx, &valid)| if valid {Some(idx)} else {None}) {
+            for option in
+                candidates
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(idx, &valid)| if valid { Some(idx) } else { None })
+            {
                 if output.len() >= max_solutions {
                     return;
                 }
                 let mut new_grid = self.clone();
-                new_grid.cells[best_cell/GRID_SIZE][best_cell % GRID_SIZE] = Cell::Given( SolvedCell { value: option as u8, given: false} );
+                new_grid.cells[best_cell / GRID_SIZE][best_cell % GRID_SIZE] =
+                    Cell::Given(SolvedCell {
+                        value: option as u8,
+                        given: false,
+                    });
                 new_grid.recursive_solve(output, max_solutions);
             }
         }
