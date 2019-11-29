@@ -113,7 +113,7 @@ impl Puzzle {
             if let Candidates(candidates) = cell {
                 solved = false;
                 if min_options >= candidates.iter().filter(|x| **x).count() {
-                    min_options = candidates.iter().count();
+                    min_options = candidates.iter().filter(|x| **x).count();
                     best_cell = index;
                 }
             }
@@ -221,5 +221,9 @@ fn main() {
     if max_solutions {
         println!("Maxed out...");
     }
-    println!("Total of {}.{:0>3} seconds elapsed", elapsed.as_secs(), elapsed.subsec_millis())
+    println!(
+        "Total of {}.{:0>3} seconds elapsed",
+        elapsed.as_secs(),
+        elapsed.subsec_millis()
+    )
 }
