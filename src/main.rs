@@ -133,6 +133,16 @@ impl Puzzle {
             }
         }
     }
+    fn solved_string(&self) -> String {
+        let mut output = String::new();
+        for cell in self.cells.iter().flatten() {
+            output += &match cell {
+                Given(solved) => (solved.value + 1).to_string(),
+                Candidates(_) => "0".to_string(),
+            };
+        }
+        output
+    }
 }
 
 impl From<String> for Puzzle {
@@ -192,5 +202,5 @@ fn main() {
     println!("{:?}", puzzle);
     let mut result = vec![];
     puzzle.recursive_solve(&mut result, 1);
-    println!("{:?}", result);
+    println!("{}", result[0].solved_string());
 }
