@@ -208,8 +208,14 @@ fn main() {
         "100009006020700050003080400009400003080050100700006020000003700000020080000100009",
     )
     .into();
-    println!("{:?}", puzzle);
     let mut result = vec![];
-    puzzle.recursive_solve(&mut result, 1);
-    println!("{}", result[0].solved_string());
+    puzzle.recursive_solve(&mut result, 1_000);
+    result.sort();
+    let max_solutions = result.len() == 1_000;
+    for solution in result {
+        println!("{}", solution.solved_string());
+    }
+    if max_solutions {
+        println!("Maxed out...");
+    }
 }
