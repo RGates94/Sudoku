@@ -1,18 +1,19 @@
 use crate::Cell::{Candidates, Solved};
 use array_init::array_init;
 use rand::prelude::SliceRandom;
+use std::ops::{Index, IndexMut};
 
 const BOX_SIZE: usize = 3;
 const GRID_SIZE: usize = BOX_SIZE * BOX_SIZE;
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
-struct SolvedCell {
+pub struct SolvedCell {
     value: u8,
     given: bool,
 }
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
-enum Cell {
+pub enum Cell {
     Solved(SolvedCell),
     Candidates([bool; GRID_SIZE]),
 }
@@ -106,7 +107,7 @@ impl Puzzle {
     }
     fn insert_value(&mut self, index: usize, value: u8) {
         if index < GRID_SIZE * GRID_SIZE {
-            self.cells[index / GRID_SIZE][index % GRID_SIZE] = Solved(SolvedCell {
+            self[index] = Solved(SolvedCell {
                 value,
                 given: false,
             });
@@ -133,7 +134,7 @@ impl Puzzle {
             output.push(self.clone());
             return;
         }
-        let candidates = self.cells[best_cell / GRID_SIZE][best_cell % GRID_SIZE];
+        let candidates = self[best_cell];
         if let Candidates(candidates) = candidates {
             for option in
                 candidates
@@ -165,17 +166,30 @@ impl Puzzle {
         let mut cells = (0..81).collect::<Vec<_>>();
         cells.shuffle(&mut rng);
         for cell_idx in cells {
-            if let Solved(val) = self.cells[cell_idx / GRID_SIZE][cell_idx % GRID_SIZE] {
-                self.cells[cell_idx / GRID_SIZE][cell_idx % GRID_SIZE] = Candidates([true; 9]);
+            if let Solved(val) = self[cell_idx] {
+                self[cell_idx] = Candidates([true; 9]);
                 let mut new_grid = self.clone();
                 let mut result = vec![];
                 new_grid.sweep();
                 new_grid.recursive_solve(&mut result, 200);
                 if result.len() != 1 {
-                    self.cells[cell_idx / GRID_SIZE][cell_idx % GRID_SIZE] = Solved(val);
+                    self[cell_idx] = Solved(val);
                 }
             }
         }
+    }
+}
+
+impl Index<usize> for Puzzle {
+    type Output = Cell;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.cells[index / GRID_SIZE][index % GRID_SIZE]
+    }
+}
+
+impl IndexMut<usize> for Puzzle {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.cells[index / GRID_SIZE][index % GRID_SIZE]
     }
 }
 
