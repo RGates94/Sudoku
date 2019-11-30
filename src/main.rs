@@ -104,8 +104,15 @@ impl Puzzle {
             self.update_box(i);
         }
     }
+    fn insert_value(&mut self, index: usize, value: u8) {
+        if index < GRID_SIZE * GRID_SIZE {
+            self.cells[index/GRID_SIZE][index % GRID_SIZE] = Solved(SolvedCell{ value, given: false});
+            self.update_row(index / GRID_SIZE);
+            self.update_column(index % GRID_SIZE);
+            self.update_box(3 * (index / (GRID_SIZE * BOX_SIZE)) + index % BOX_SIZE);
+        }
+    }
     fn recursive_solve(&mut self, output: &mut Vec<Self>, max_solutions: usize) {
-        self.sweep();
         let mut min_options = GRID_SIZE;
         let mut best_cell = 0;
         let mut solved = true;
@@ -134,11 +141,7 @@ impl Puzzle {
                     return;
                 }
                 let mut new_grid = self.clone();
-                new_grid.cells[best_cell / GRID_SIZE][best_cell % GRID_SIZE] =
-                    Cell::Solved(SolvedCell {
-                        value: option as u8,
-                        given: false,
-                    });
+                new_grid.insert_value(best_cell, option as u8);
                 new_grid.recursive_solve(output, max_solutions);
             }
         }
@@ -211,6 +214,7 @@ fn main() {
     .into();
     let start = Instant::now();
     let mut result = vec![];
+    puzzle.sweep();
     puzzle.recursive_solve(&mut result, 1_000);
     let elapsed = Instant::now() - start;
     result.sort();
