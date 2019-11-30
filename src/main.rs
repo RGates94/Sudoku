@@ -106,7 +106,10 @@ impl Puzzle {
     }
     fn insert_value(&mut self, index: usize, value: u8) {
         if index < GRID_SIZE * GRID_SIZE {
-            self.cells[index/GRID_SIZE][index % GRID_SIZE] = Solved(SolvedCell{ value, given: false});
+            self.cells[index / GRID_SIZE][index % GRID_SIZE] = Solved(SolvedCell {
+                value,
+                given: false,
+            });
             self.update_row(index / GRID_SIZE);
             self.update_column(index % GRID_SIZE);
             self.update_box(3 * (index / (GRID_SIZE * BOX_SIZE)) + index % BOX_SIZE);
