@@ -1,5 +1,6 @@
 use crate::Cell::{Candidates, Solved};
 use array_init::array_init;
+use rand::prelude::SliceRandom;
 
 const BOX_SIZE: usize = 3;
 const GRID_SIZE: usize = BOX_SIZE * BOX_SIZE;
@@ -158,6 +159,23 @@ impl Puzzle {
                 Candidates(_) => '0',
             })
             .collect()
+    }
+    pub fn minimize_puzzle(&mut self) {
+        let mut rng = rand::thread_rng();
+        let mut cells = (0..81).collect::<Vec<_>>();
+        cells.shuffle(&mut rng);
+        for cell_idx in cells {
+            if let Solved(val) = self.cells[cell_idx / GRID_SIZE][cell_idx % GRID_SIZE] {
+                self.cells[cell_idx / GRID_SIZE][cell_idx % GRID_SIZE] = Candidates([true; 9]);
+                let mut new_grid = self.clone();
+                let mut result = vec![];
+                new_grid.sweep();
+                new_grid.recursive_solve(&mut result, 200);
+                if result.len() != 1 {
+                    self.cells[cell_idx / GRID_SIZE][cell_idx % GRID_SIZE] = Solved(val);
+                }
+            }
+        }
     }
 }
 
