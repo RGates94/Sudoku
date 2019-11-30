@@ -73,27 +73,27 @@ impl Puzzle {
                 .iter()
                 .map(|x| &x[BOX_SIZE * (index % BOX_SIZE)..BOX_SIZE * ((index % BOX_SIZE) + 1)])
                 .flatten()
-                {
-                    if let Solved(cell) = cell {
-                        if let Some(guess) = cell_mask.get_mut(cell.value as usize) {
-                            *guess = false;
-                        }
+            {
+                if let Solved(cell) = cell {
+                    if let Some(guess) = cell_mask.get_mut(cell.value as usize) {
+                        *guess = false;
                     }
                 }
+            }
 
             for cell in self.cells
                 [BOX_SIZE * (index / BOX_SIZE)..BOX_SIZE * ((index / BOX_SIZE) + 1)]
                 .iter_mut()
                 .map(|x| &mut x[BOX_SIZE * (index % BOX_SIZE)..BOX_SIZE * ((index % BOX_SIZE) + 1)])
                 .flatten()
-                {
-                    if let Candidates(guesses) = cell {
-                        guesses
-                            .iter_mut()
-                            .zip(cell_mask.iter_mut())
-                            .for_each(|(guess, mask)| *guess &= *mask)
-                    }
+            {
+                if let Candidates(guesses) = cell {
+                    guesses
+                        .iter_mut()
+                        .zip(cell_mask.iter_mut())
+                        .for_each(|(guess, mask)| *guess &= *mask)
                 }
+            }
         }
     }
     pub fn sweep(&mut self) {
@@ -139,14 +139,14 @@ impl Puzzle {
                     .iter()
                     .enumerate()
                     .filter_map(|(idx, &valid)| if valid { Some(idx) } else { None })
-                {
-                    if output.len() >= max_solutions {
-                        return;
-                    }
-                    let mut new_grid = self.clone();
-                    new_grid.insert_value(best_cell, option as u8);
-                    new_grid.recursive_solve(output, max_solutions);
+            {
+                if output.len() >= max_solutions {
+                    return;
                 }
+                let mut new_grid = self.clone();
+                new_grid.insert_value(best_cell, option as u8);
+                new_grid.recursive_solve(output, max_solutions);
+            }
         }
     }
     pub fn solved_string(&self) -> String {

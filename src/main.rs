@@ -1,5 +1,5 @@
-use sudoku::Puzzle;
 use std::time::Instant;
+use sudoku::Puzzle;
 
 fn main() {
     let mut puzzle: Puzzle =
