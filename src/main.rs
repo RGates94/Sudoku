@@ -122,8 +122,9 @@ impl Puzzle {
         for (index, cell) in self.cells.iter().flatten().enumerate() {
             if let Candidates(candidates) = cell {
                 solved = false;
-                if min_options >= candidates.iter().filter(|x| **x).count() {
-                    min_options = candidates.iter().filter(|x| **x).count();
+                let options = candidates.iter().filter(|x| **x).count();
+                if min_options >= options {
+                    min_options = options;
                     best_cell = index;
                 }
             }
