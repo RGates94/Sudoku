@@ -150,14 +150,14 @@ impl Puzzle {
         }
     }
     fn solved_string(&self) -> String {
-        let mut output = String::new();
-        for cell in self.cells.iter().flatten() {
-            output += &match cell {
-                Solved(solved) => (solved.value + 1).to_string(),
-                Candidates(_) => "0".to_string(),
-            };
-        }
-        output
+        self.cells
+            .iter()
+            .flatten()
+            .map(|cell| match cell {
+                Solved(solved) => (solved.value + 49) as char,
+                Candidates(_) => '0',
+            })
+            .collect()
     }
 }
 
