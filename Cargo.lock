@@ -6,6 +6,13 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "rsudoku"
+version = "0.1.0"
+dependencies = [
+ "sudoku 0.1.0",
+]
+
+[[package]]
 name = "sudoku"
 version = "0.1.0"
 dependencies = [
