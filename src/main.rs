@@ -161,8 +161,8 @@ impl Puzzle {
     }
 }
 
-impl From<String> for Puzzle {
-    fn from(input: String) -> Self {
+impl From<&str> for Puzzle {
+    fn from(input: &str) -> Self {
         let chars = input.chars().collect::<Vec<_>>();
         Self {
             cells: array_init(|row| {
@@ -211,10 +211,8 @@ impl From<String> for Puzzle {
 }
 
 fn main() {
-    let mut puzzle: Puzzle = String::from(
-        "100009006020700050003080400009400003080050100700006020000003700000020080000100009",
-    )
-    .into();
+    let mut puzzle: Puzzle =
+        "100009006020700050003080400009400003080050100700006020000003700000020080000100009".into();
     let start = Instant::now();
     let mut result = vec![];
     puzzle.sweep();
